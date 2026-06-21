@@ -1,11 +1,11 @@
-// Görme Engelliler İçin Akıllı Gözlük Projesi (0 CM Filtreli Sürüm)
+// Smart Glasses Project for Visually Impaired (0 CM Filter Version)
 
 const int trigPin = 9;       
 const int echoPin = 8;       
 const int buzzerPin = 11;    
 
-long sure;
-int mesafe;
+long duration;
+int distance;
 
 void setup() {
   pinMode(trigPin, OUTPUT);
@@ -21,35 +21,31 @@ void loop() {
   delayMicroseconds(10);
   digitalWrite(trigPin, LOW);
   
-  sure = pulseIn(echoPin, HIGH);
-  mesafe = sure / 58.2;
+  // Add timeout to prevent freezing if sensor fails
+  duration = pulseIn(echoPin, HIGH, 30000);
   
-  Serial.print("Mesafe: ");
-  Serial.print(mesafe);
+  distance = duration / 58.2;
+  
+  Serial.print("Distance: ");
+  Serial.print(distance);
   Serial.println(" cm");
 
-  // HATA FİLTRESİ: Eğer mesafe 0 ise veya sensör okuyamadıysa buzzer'ı sustur
-  if (mesafe <= 0 || mesafe > 1000) {
+  // ERROR FILTER: If distance is 0 or invalid, turn buzzer off
+  if (distance <= 0 || distance > 400) {
     noTone(buzzerPin);
   }
-  // Gerçek engel algılama senaryoları (Sadece 1 ile 100 cm arası)
-  else if (mesafe > 0 && mesafe <= 30) {
-    tone(buzzerPin, 2700); 
-    delay(100);
-    noTone(buzzerPin);
-    delay(50);
+  // Real obstacle detection range (only 1 to 100 cm)
+  else if (distance <= 30) {
+    tone(buzzerPin, 2700);
+    delay(80);
   } 
-  else if (mesafe > 30 && mesafe <= 60) {
-    tone(buzzerPin, 2700); 
-    delay(200);
-    noTone(buzzerPin);
+  else if (distance <= 60) {
+    tone(buzzerPin, 2700);
     delay(200);
   } 
-  else if (mesafe > 60 && mesafe <= 100) {
-    tone(buzzerPin, 2700); 
+  else if (distance <= 100) {
+    tone(buzzerPin, 2700);
     delay(400);
-    noTone(buzzerPin);
-    delay(500);
   } 
   else {
     noTone(buzzerPin);
